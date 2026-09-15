@@ -1,452 +1,643 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>Markets Mad Scientists</title>
-  <style>
-    :root{
-      --bg:#0b1220;
-      --panel:#111a2e;
-      --panel-2:#17233c;
-      --text:#eef4ff;
-      --muted:#9fb0cc;
-      --accent:#7c3aed;
-      --accent-2:#22c55e;
-      --danger:#ef4444;
-      --border:rgba(255,255,255,.09);
-      --shadow:0 18px 45px rgba(0,0,0,.22);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(124,58,237,.18), transparent 30%),
-        radial-gradient(circle at top right, rgba(34,197,94,.10), transparent 22%),
-        var(--bg);
-      min-height:100vh;
-    }
-    button,input,select{font:inherit}
-    .app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
-    aside{
-      border-right:1px solid var(--border);
-      padding:26px 20px;
-      background:rgba(10,17,31,.85);
-      backdrop-filter:blur(12px);
-      position:sticky;top:0;height:100vh;
-    }
-    .brand{display:flex;gap:12px;align-items:center;margin-bottom:30px}
-    .logo{
-      width:42px;height:42px;border-radius:14px;
-      display:grid;place-items:center;font-weight:900;
-      background:linear-gradient(135deg,var(--accent),#a78bfa);
-      box-shadow:0 10px 30px rgba(124,58,237,.35);
-    }
-    .brand h1{font-size:16px;margin:0}
-    .brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
-    nav{display:grid;gap:8px}
-    nav button{
-      border:0;background:transparent;color:var(--muted);
-      text-align:left;padding:12px 14px;border-radius:12px;cursor:pointer;
-    }
-    nav button:hover,nav button.active{background:var(--panel-2);color:var(--text)}
-    .side-footer{position:absolute;bottom:24px;left:20px;right:20px}
-    .badge{
-      background:var(--panel);border:1px solid var(--border);border-radius:14px;
-      padding:12px;color:var(--muted);font-size:12px;line-height:1.45;
-    }
-    main{padding:28px 32px 42px;overflow:hidden}
-    .topbar{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:24px}
-    .topbar h2{margin:0 0 4px;font-size:28px}
-    .topbar p{margin:0;color:var(--muted)}
-    .top-actions{display:flex;gap:10px;align-items:center}
-    .btn{
-      border:1px solid var(--border);background:var(--panel);color:var(--text);
-      padding:10px 14px;border-radius:12px;cursor:pointer;
-    }
-    .btn.primary{background:linear-gradient(135deg,var(--accent),#6d28d9);border-color:transparent}
-    .search-row{
-      display:grid;grid-template-columns:1fr auto;gap:12px;
-      background:var(--panel);border:1px solid var(--border);padding:14px;border-radius:18px;
-      box-shadow:var(--shadow);margin-bottom:18px;
-    }
-    .search-row input{
-      width:100%;background:transparent;border:0;outline:none;color:var(--text);padding:10px 8px;
-    }
-    .grid{display:grid;gap:16px}
-    .stats{grid-template-columns:repeat(4,1fr);margin-bottom:16px}
-    .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.012)),var(--panel);
-      border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);
-    }
-    .stat-label{color:var(--muted);font-size:13px}
-    .stat-value{font-size:26px;font-weight:800;margin:7px 0}
-    .change{font-size:12px}
-    .up{color:#4ade80}.down{color:#fb7185}.flat{color:#facc15}
-    .dashboard{grid-template-columns:2fr 1fr;margin-bottom:16px}
-    .card h3{margin:0 0 14px;font-size:16px}
-    .chart-wrap{height:330px;position:relative}
-    canvas{width:100%;height:100%}
-    .prediction{
-      display:flex;flex-direction:column;justify-content:space-between;min-height:330px;
-      background:
-        linear-gradient(180deg,rgba(124,58,237,.16),rgba(124,58,237,.04)),
-        var(--panel);
-    }
-    .prediction-value{font-size:44px;font-weight:900;margin:10px 0 4px}
-    .pill{
-      display:inline-flex;padding:6px 10px;border-radius:999px;
-      background:rgba(34,197,94,.12);color:#86efac;font-size:12px;font-weight:700;
-    }
-    .muted{color:var(--muted)}
-    .market-list{display:grid;gap:10px}
-    .market-item{
-      display:grid;grid-template-columns:1.2fr .8fr .6fr;gap:12px;
-      padding:12px 0;border-bottom:1px solid var(--border);align-items:center;
-    }
-    .market-item:last-child{border-bottom:0}
-    .symbol{font-weight:800}.company{color:var(--muted);font-size:12px;margin-top:2px}
-    .price{text-align:right;font-weight:700}
-    .mini{text-align:right;font-size:12px}
-    .section{display:none}
-    .section.active{display:block}
-    .login-modal{
-      position:fixed;inset:0;background:rgba(0,0,0,.58);display:none;place-items:center;z-index:20;
-    }
-    .login-modal.show{display:grid}
-    .modal{
-      width:min(430px,92vw);background:var(--panel);border:1px solid var(--border);
-      border-radius:20px;padding:24px;box-shadow:var(--shadow);
-    }
-    .modal h3{margin-top:0}
-    .field{display:grid;gap:7px;margin:14px 0}
-    .field input{
-      background:var(--panel-2);color:var(--text);border:1px solid var(--border);
-      padding:12px;border-radius:12px;outline:none;
-    }
-    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
-    .result-banner{
-      margin-bottom:16px;padding:13px 15px;border:1px solid var(--border);
-      background:var(--panel);border-radius:14px;display:none;
-    }
-    .result-banner.show{display:block}
-    .about-grid{grid-template-columns:repeat(3,1fr)}
-    .about-grid .card p{color:var(--muted);line-height:1.55}
-    @media (max-width:1000px){
-      .app{grid-template-columns:1fr}
-      aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--border)}
-      nav{grid-template-columns:repeat(4,1fr)}
-      .side-footer{display:none}
-      .stats{grid-template-columns:repeat(2,1fr)}
-      .dashboard{grid-template-columns:1fr}
-    }
-    @media (max-width:650px){
-      main{padding:20px 14px 34px}
-      aside{padding:18px 14px}
-      .brand{margin-bottom:16px}
-      nav{grid-template-columns:repeat(2,1fr)}
-      .topbar{align-items:flex-start;flex-direction:column}
-      .stats,.about-grid{grid-template-columns:1fr}
-      .search-row{grid-template-columns:1fr}
-      .market-item{grid-template-columns:1fr auto}
-      .market-item .mini{grid-column:2}
-    }
-  </style>
+
+  <!-- Connects the CSS file -->
+  <link
+    rel="stylesheet"
+    href="css/styles.css"
+  >
 </head>
+
+
 <body>
-<div class="app">
-  <aside>
-    <div class="brand">
-      <div class="logo">MM</div>
-      <div>
-        <h1>Markets Mad Scientists</h1>
-        <p>Market Intelligence Lab</p>
-      </div>
-    </div>
-    <nav>
-      <button class="active" data-section="dashboard">Dashboard</button>
-      <button data-section="markets">Markets</button>
-      <button data-section="predictions">Predictions</button>
-      <button data-section="about">About Project</button>
-    </nav>
-    <div class="side-footer">
-      <div class="badge">
-        Capstone Demo<br>
-        Historical trend analysis + simple prediction dashboard.
-      </div>
-    </div>
-  </aside>
 
-  <main>
-    <div class="topbar">
-      <div>
-        <h2 id="pageTitle">Market Dashboard</h2>
-        <p id="pageSubtitle">Track trends, compare data, and explore simple forecasts.</p>
-      </div>
-      <div class="top-actions">
-        <button class="btn" id="loginBtn">Log In</button>
-        <button class="btn primary" id="refreshBtn">Refresh Data</button>
-      </div>
-    </div>
+  <div class="app">
 
-    <section class="section active" id="dashboard">
-      <div class="search-row">
-        <input id="searchInput" placeholder="Search a market or symbol, e.g. AAPL, TSLA, SPY..." />
-        <button class="btn primary" id="searchBtn">Search Market</button>
-      </div>
-      <div class="result-banner" id="resultBanner"></div>
+    <!-- ========================================
+         SIDEBAR
+    ========================================= -->
 
-      <div class="grid stats">
-        <div class="card">
-          <div class="stat-label">Selected Market</div>
-          <div class="stat-value" id="selectedSymbol">AAPL</div>
-          <div class="change up" id="selectedChange">▲ 1.82% today</div>
+    <aside>
+
+      <div class="brand">
+
+        <div class="logo">
+          MM
         </div>
-        <div class="card">
-          <div class="stat-label">Current Price</div>
-          <div class="stat-value" id="currentPrice">$229.42</div>
-          <div class="change flat">Demo market data</div>
+
+        <div>
+
+          <h1>
+            Markets Mad Scientists
+          </h1>
+
+          <p>
+            Market Intelligence Lab
+          </p>
+
         </div>
-        <div class="card">
-          <div class="stat-label">30-Day Trend</div>
-          <div class="stat-value" id="trendLabel">Increasing</div>
-          <div class="change up">Positive momentum</div>
-        </div>
-        <div class="card">
-          <div class="stat-label">Prediction Confidence</div>
-          <div class="stat-value" id="confidence">72%</div>
-          <div class="change flat">Educational estimate</div>
-        </div>
+
       </div>
 
-      <div class="grid dashboard">
-        <div class="card">
-          <h3>Historical Trend</h3>
-          <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+
+      <nav>
+
+        <button
+          class="active"
+          data-section="dashboard"
+        >
+          Dashboard
+        </button>
+
+        <button
+          data-section="markets"
+        >
+          Markets
+        </button>
+
+        <button
+          data-section="predictions"
+        >
+          Predictions
+        </button>
+
+        <button
+          data-section="about"
+        >
+          About Project
+        </button>
+
+      </nav>
+
+
+      <div class="side-footer">
+
+        <div class="badge">
+
+          Capstone Demo
+
+          <br>
+
+          Historical trend analysis
+          and prediction dashboard.
+
         </div>
-        <div class="card prediction">
-          <div>
-            <h3>Next-Period Prediction</h3>
-            <span class="pill" id="predictionPill">Likely Increase</span>
-            <div class="prediction-value" id="predictionValue">+2.4%</div>
-            <p class="muted">Based on recent historical movement in this demo.</p>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ========================================
+         MAIN CONTENT
+    ========================================= -->
+
+    <main>
+
+
+      <!-- TOP BAR -->
+
+      <div class="topbar">
+
+        <div>
+
+          <h2 id="pageTitle">
+            Market Dashboard
+          </h2>
+
+          <p id="pageSubtitle">
+            Track trends, compare data,
+            and explore simple forecasts.
+          </p>
+
+        </div>
+
+
+        <div class="top-actions">
+
+          <button
+            class="btn"
+            id="loginBtn"
+          >
+            Log In
+          </button>
+
+          <button
+            class="btn primary"
+            id="refreshBtn"
+          >
+            Refresh Data
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================================
+           DASHBOARD PAGE
+      ========================================= -->
+
+      <section
+        class="section active"
+        id="dashboard"
+      >
+
+
+        <!-- SEARCH BAR -->
+
+        <div class="search-row">
+
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search a market or symbol, e.g. AAPL, TSLA, SPY..."
+          >
+
+          <button
+            class="btn primary"
+            id="searchBtn"
+          >
+            Search Market
+          </button>
+
+        </div>
+
+
+        <!-- SEARCH RESULT MESSAGE -->
+
+        <div
+          class="result-banner"
+          id="resultBanner"
+        ></div>
+
+
+        <!-- ========================================
+             MARKET INFORMATION CARDS
+        ========================================= -->
+
+        <div class="grid stats">
+
+
+          <!-- SELECTED MARKET -->
+
+          <div class="card">
+
+            <div class="stat-label">
+              Selected Market
+            </div>
+
+            <div
+              class="stat-value"
+              id="selectedSymbol"
+            >
+              AAPL
+            </div>
+
+            <div
+              class="change up"
+              id="selectedChange"
+            >
+              ▲ 1.82% today
+            </div>
+
           </div>
-          <div>
-            <div class="stat-label">Model Note</div>
-            <p class="muted" style="line-height:1.55">
-              This prototype uses simple historical trend logic. A future version can connect a Python ML model and live market API.
+
+
+          <!-- CURRENT PRICE -->
+
+          <div class="card">
+
+            <div class="stat-label">
+              Current Price
+            </div>
+
+            <div
+              class="stat-value"
+              id="currentPrice"
+            >
+              $229.42
+            </div>
+
+            <div class="change flat">
+              Demo market data
+            </div>
+
+          </div>
+
+
+          <!-- TREND -->
+
+          <div class="card">
+
+            <div class="stat-label">
+              30-Day Trend
+            </div>
+
+            <div
+              class="stat-value"
+              id="trendLabel"
+            >
+              Increasing
+            </div>
+
+            <div class="change up">
+              Positive momentum
+            </div>
+
+          </div>
+
+
+          <!-- CONFIDENCE -->
+
+          <div class="card">
+
+            <div class="stat-label">
+              Prediction Confidence
+            </div>
+
+            <div
+              class="stat-value"
+              id="confidence"
+            >
+              72%
+            </div>
+
+            <div class="change flat">
+              Educational estimate
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================
+             CHART AND PREDICTION
+        ========================================= -->
+
+        <div class="grid dashboard">
+
+
+          <!-- HISTORICAL CHART -->
+
+          <div class="card">
+
+            <h3>
+              Historical Trend
+            </h3>
+
+            <div class="chart-wrap">
+
+              <canvas
+                id="trendChart"
+              ></canvas>
+
+            </div>
+
+          </div>
+
+
+          <!-- PREDICTION CARD -->
+
+          <div class="card prediction">
+
+            <div>
+
+              <h3>
+                Next-Period Prediction
+              </h3>
+
+              <span
+                class="pill"
+                id="predictionPill"
+              >
+                Likely Increase
+              </span>
+
+              <div
+                class="prediction-value"
+                id="predictionValue"
+              >
+                +2.4%
+              </div>
+
+              <p class="muted">
+                Based on recent historical
+                movement in this demo.
+              </p>
+
+            </div>
+
+
+            <div>
+
+              <div class="stat-label">
+                Model Note
+              </div>
+
+              <p
+                class="muted"
+                style="line-height: 1.55;"
+              >
+                This prototype currently uses
+                simple historical trend logic.
+
+                A future version will connect
+                to a Python machine-learning
+                model and live market API.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================
+             POPULAR MARKETS
+        ========================================= -->
+
+        <div class="card">
+
+          <h3>
+            Popular Markets
+          </h3>
+
+          <div
+            class="market-list"
+            id="popularMarkets"
+          ></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================
+           MARKETS PAGE
+      ========================================= -->
+
+      <section
+        class="section"
+        id="markets"
+      >
+
+        <div class="card">
+
+          <h3>
+            Market Explorer
+          </h3>
+
+          <p class="muted">
+            Choose a market to compare
+            current movement and historical
+            behavior.
+          </p>
+
+          <div
+            class="market-list"
+            id="allMarkets"
+          ></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================
+           PREDICTIONS PAGE
+      ========================================= -->
+
+      <section
+        class="section"
+        id="predictions"
+      >
+
+        <div class="grid about-grid">
+
+
+          <!-- TREND DETECTION -->
+
+          <div class="card">
+
+            <h3>
+              Trend Detection
+            </h3>
+
+            <p>
+              The application compares recent
+              historical values to determine
+              whether the selected market is
+              generally increasing, decreasing,
+              or remaining stable.
             </p>
+
           </div>
+
+
+          <!-- PREDICTION MODEL -->
+
+          <div class="card">
+
+            <h3>
+              Prediction Model
+            </h3>
+
+            <p>
+              The current prototype uses
+              simple trend-based logic.
+
+              The full capstone will connect
+              to a Python service using
+              regression or another
+              machine-learning method.
+            </p>
+
+          </div>
+
+
+          <!-- USER EXPLANATION -->
+
+          <div class="card">
+
+            <h3>
+              User Explanation
+            </h3>
+
+            <p>
+              Predictions are displayed using
+              simple language and confidence
+              values so beginners can better
+              understand what the system is
+              showing.
+            </p>
+
+          </div>
+
         </div>
-      </div>
 
-      <div class="card">
-        <h3>Popular Markets</h3>
-        <div class="market-list" id="popularMarkets"></div>
-      </div>
-    </section>
+      </section>
 
-    <section class="section" id="markets">
-      <div class="card">
-        <h3>Market Explorer</h3>
-        <p class="muted">Choose a demo market to compare current movement and historical behavior.</p>
-        <div class="market-list" id="allMarkets"></div>
-      </div>
-    </section>
 
-    <section class="section" id="predictions">
-      <div class="grid about-grid">
+      <!-- ========================================
+           ABOUT PAGE
+      ========================================= -->
+
+      <section
+        class="section"
+        id="about"
+      >
+
         <div class="card">
-          <h3>Trend Detection</h3>
-          <p>The application compares recent historical values to determine whether the selected market is generally increasing, decreasing, or stable.</p>
-        </div>
-        <div class="card">
-          <h3>Prediction Model</h3>
-          <p>The demo uses simple trend-based logic. The full capstone can connect to a Python service using regression or another machine-learning model.</p>
-        </div>
-        <div class="card">
-          <h3>User Explanation</h3>
-          <p>Predictions are displayed using plain language and confidence values so beginners can understand what the system is showing.</p>
-        </div>
-      </div>
-    </section>
 
-    <section class="section" id="about">
-      <div class="card">
-        <h3>Capstone Project</h3>
-        <p class="muted" style="line-height:1.7">
-          Markets Mad Scientists is a market-trend analysis application designed for students, beginners, researchers, and small business owners.
-          The system is intended to collect market data, visualize historical patterns, identify trends, and generate simple predictions in a clear interface.
-        </p>
-        <p class="muted" style="line-height:1.7">
-          Future development can add a real API, secure user accounts, a database, saved watchlists, and a Python machine-learning backend.
-        </p>
-      </div>
-    </section>
-  </main>
-</div>
+          <h3>
+            Markets Mad Scientists
+          </h3>
 
-<div class="login-modal" id="loginModal">
-  <div class="modal">
-    <h3>Log In</h3>
-    <p class="muted">Demo login for the capstone prototype.</p>
-    <div class="field">
-      <label>Email</label>
-      <input id="email" type="email" placeholder="student@example.com" />
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input id="password" type="password" placeholder="••••••••" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn" id="cancelLogin">Cancel</button>
-      <button class="btn primary" id="submitLogin">Log In</button>
-    </div>
+          <p
+            class="muted"
+            style="line-height: 1.7;"
+          >
+            Markets Mad Scientists is a
+            market-trend analysis application
+            designed for students, beginners,
+            researchers, small business owners,
+            and individuals interested in
+            understanding market information.
+          </p>
+
+
+          <p
+            class="muted"
+            style="line-height: 1.7;"
+          >
+            The goal of the project is to
+            collect market data, display
+            historical patterns, identify
+            market trends, and generate
+            understandable predictions.
+          </p>
+
+
+          <p
+            class="muted"
+            style="line-height: 1.7;"
+          >
+            Future development will include
+            a real market-data API, secure user
+            accounts, database storage,
+            watchlists, and a Python
+            machine-learning backend.
+          </p>
+
+        </div>
+
+      </section>
+
+
+    </main>
+
   </div>
-</div>
 
-<script>
-const marketData = {
-  AAPL:{name:"Apple Inc.",price:229.42,change:1.82,trend:"Increasing",confidence:72,prediction:2.4,data:[198,202,199,207,211,210,216,218,221,219,224,229]},
-  TSLA:{name:"Tesla Inc.",price:238.18,change:-1.16,trend:"Decreasing",confidence:66,prediction:-1.8,data:[262,258,268,255,249,252,247,245,242,241,239,238]},
-  SPY:{name:"S&P 500 ETF",price:649.31,change:.44,trend:"Increasing",confidence:78,prediction:1.2,data:[612,617,621,619,626,631,628,636,640,642,646,649]},
-  NVDA:{name:"NVIDIA Corp.",price:181.64,change:2.31,trend:"Increasing",confidence:81,prediction:3.1,data:[151,155,160,158,165,168,170,173,171,177,179,182]},
-  AMZN:{name:"Amazon.com Inc.",price:225.08,change:.18,trend:"Stable",confidence:61,prediction:.4,data:[218,220,217,221,223,221,224,225,223,224,226,225]}
-};
 
-let selected = "AAPL";
+  <!-- ========================================
+       LOGIN MODAL
+  ========================================= -->
 
-function money(v){return "$"+Number(v).toFixed(2)}
-function changeClass(v){return v>0?"up":v<0?"down":"flat"}
-function changeText(v){return `${v>0?"▲":v<0?"▼":"●"} ${Math.abs(v).toFixed(2)}% today`}
+  <div
+    class="login-modal"
+    id="loginModal"
+  >
 
-function renderMarketList(targetId){
-  const el=document.getElementById(targetId);
-  el.innerHTML="";
-  Object.entries(marketData).forEach(([symbol,m])=>{
-    const row=document.createElement("div");
-    row.className="market-item";
-    row.innerHTML=`
-      <div><div class="symbol">${symbol}</div><div class="company">${m.name}</div></div>
-      <div class="price">${money(m.price)}</div>
-      <div class="mini ${changeClass(m.change)}">${changeText(m.change)}</div>
-    `;
-    row.style.cursor="pointer";
-    row.onclick=()=>selectMarket(symbol,true);
-    el.appendChild(row);
-  });
-}
+    <div class="modal">
 
-function selectMarket(symbol, jump=false){
-  selected=symbol;
-  const m=marketData[symbol];
-  document.getElementById("selectedSymbol").textContent=symbol;
-  document.getElementById("selectedChange").className="change "+changeClass(m.change);
-  document.getElementById("selectedChange").textContent=changeText(m.change);
-  document.getElementById("currentPrice").textContent=money(m.price);
-  document.getElementById("trendLabel").textContent=m.trend;
-  document.getElementById("confidence").textContent=m.confidence+"%";
-  document.getElementById("predictionValue").textContent=(m.prediction>0?"+":"")+m.prediction.toFixed(1)+"%";
-  const pill=document.getElementById("predictionPill");
-  pill.textContent=m.prediction>0?"Likely Increase":m.prediction<0?"Possible Decrease":"Likely Stable";
-  pill.style.color=m.prediction>=0?"#86efac":"#fda4af";
-  pill.style.background=m.prediction>=0?"rgba(34,197,94,.12)":"rgba(239,68,68,.12)";
-  drawChart(m.data);
-  if(jump) showSection("dashboard");
-}
+      <h3>
+        Log In
+      </h3>
 
-function drawChart(values){
-  const canvas=document.getElementById("trendChart");
-  const rect=canvas.getBoundingClientRect();
-  const dpr=window.devicePixelRatio||1;
-  canvas.width=rect.width*dpr;
-  canvas.height=rect.height*dpr;
-  const ctx=canvas.getContext("2d");
-  ctx.scale(dpr,dpr);
-  const w=rect.width,h=rect.height,pad=26;
-  ctx.clearRect(0,0,w,h);
-  const min=Math.min(...values),max=Math.max(...values);
-  const x=i=>pad+i*(w-pad*2)/(values.length-1);
-  const y=v=>h-pad-(v-min)/(max-min||1)*(h-pad*2);
+      <p class="muted">
+        Demo login for the capstone prototype.
+      </p>
 
-  ctx.strokeStyle="rgba(255,255,255,.08)";
-  ctx.lineWidth=1;
-  for(let i=0;i<5;i++){
-    const gy=pad+i*(h-pad*2)/4;
-    ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(w-pad,gy);ctx.stroke();
-  }
-  const grad=ctx.createLinearGradient(0,pad,0,h-pad);
-  grad.addColorStop(0,"rgba(124,58,237,.45)");
-  grad.addColorStop(1,"rgba(124,58,237,0)");
-  ctx.beginPath();
-  values.forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));
-  ctx.lineTo(x(values.length-1),h-pad);ctx.lineTo(x(0),h-pad);ctx.closePath();
-  ctx.fillStyle=grad;ctx.fill();
 
-  ctx.beginPath();
-  values.forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));
-  ctx.strokeStyle="#a78bfa";ctx.lineWidth=3;ctx.stroke();
+      <!-- EMAIL -->
 
-  values.forEach((v,i)=>{
-    ctx.beginPath();ctx.arc(x(i),y(v),3.5,0,Math.PI*2);
-    ctx.fillStyle="#ddd6fe";ctx.fill();
-  });
-}
+      <div class="field">
 
-function showSection(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.id===id));
-  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.section===id));
-  const titles={
-    dashboard:["Market Dashboard","Track trends, compare data, and explore simple forecasts."],
-    markets:["Market Explorer","Browse and select from the available demo markets."],
-    predictions:["Prediction Overview","See how the prediction feature will work in the full capstone."],
-    about:["About the Project","Capstone goals, audience, and future development."]
-  };
-  document.getElementById("pageTitle").textContent=titles[id][0];
-  document.getElementById("pageSubtitle").textContent=titles[id][1];
-  if(id==="dashboard") requestAnimationFrame(()=>drawChart(marketData[selected].data));
-}
+        <label for="email">
+          Email
+        </label>
 
-document.querySelectorAll("nav button").forEach(btn=>btn.onclick=()=>showSection(btn.dataset.section));
+        <input
+          id="email"
+          type="email"
+          placeholder="student@example.com"
+        >
 
-document.getElementById("searchBtn").onclick=()=>{
-  const q=document.getElementById("searchInput").value.trim().toUpperCase();
-  const banner=document.getElementById("resultBanner");
-  if(marketData[q]){
-    selectMarket(q);
-    banner.innerHTML=`Showing <strong>${q}</strong> — ${marketData[q].name}`;
-  } else {
-    banner.innerHTML=`No demo result found for <strong>${q||"that search"}</strong>. Try AAPL, TSLA, SPY, NVDA, or AMZN.`;
-  }
-  banner.classList.add("show");
-};
-document.getElementById("searchInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter") document.getElementById("searchBtn").click();
-});
+      </div>
 
-document.getElementById("refreshBtn").onclick=()=>{
-  const btn=document.getElementById("refreshBtn");
-  btn.textContent="Updated ✓";
-  setTimeout(()=>btn.textContent="Refresh Data",1200);
-};
 
-const modal=document.getElementById("loginModal");
-document.getElementById("loginBtn").onclick=()=>modal.classList.add("show");
-document.getElementById("cancelLogin").onclick=()=>modal.classList.remove("show");
-document.getElementById("submitLogin").onclick=()=>{
-  const email=document.getElementById("email").value.trim();
-  if(!email){alert("Enter an email for the demo login.");return;}
-  document.getElementById("loginBtn").textContent="Logged In";
-  modal.classList.remove("show");
-};
-modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("show")});
+      <!-- PASSWORD -->
 
-renderMarketList("popularMarkets");
-renderMarketList("allMarkets");
-selectMarket("AAPL");
-window.addEventListener("resize",()=>{if(document.getElementById("dashboard").classList.contains("active"))drawChart(marketData[selected].data)});
-</script>
+      <div class="field">
+
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          placeholder="Enter password"
+        >
+
+      </div>
+
+
+      <!-- LOGIN BUTTONS -->
+
+      <div class="modal-actions">
+
+        <button
+          class="btn"
+          id="cancelLogin"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="btn primary"
+          id="submitLogin"
+        >
+          Log In
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================
+       CONNECT JAVASCRIPT
+  ========================================= -->
+
+  <script src="js/app.js"></script>
+
+
 </body>
+
 </html>
