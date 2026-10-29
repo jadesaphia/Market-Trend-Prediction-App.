@@ -2,7 +2,7 @@
 
 ## Team Name
 
-Markets Mad Scientists
+Market Mad Scientists
 
 ## Project Description
 
